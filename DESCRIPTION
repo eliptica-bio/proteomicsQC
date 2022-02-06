@@ -1,0 +1,23 @@
+Package: proteomicsQC
+Type: Package
+Title: A set of Routines to plot and analyse DIA-NN reports 
+Version: 0.1.0
+Author: Aleksej Zelezniak
+Maintainer: The package maintainer Aleksej Zelezniak <azelnet@gmail.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0)
+Imports:
+    tidyr,
+    dplyr,
+    magrittr,
+    ggplot2,
+    fs,
+    forcats,
+    quantreg,
+    purrr
+RoxygenNote: 7.1.1
