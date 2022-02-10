@@ -27,11 +27,10 @@ countInGolden(
 Counts features from DIA-NN report e.g. Precursor.Id in golden standard list
 }
 \examples{
-golden_linear = linear_peptides_5minsswath \%>\% ungroup \%>\% filter(protocol == "5-min-sswath", n >=10, cor >= 0.8)
 LIN_PROTOCOL = "5-min-sswath"
 LIN_N = 10
 LIN_COR = 0.8
-golden_linear = linear_peptides \%>\% ungroup \%>\% filter(protocol == LIN_PROTOCOL, n >= LIN_N, cor >= LIN_COR)
+golden_linear = linear_peptides_5minsswath \%>\% ungroup \%>\% filter(protocol == LIN_PROTOCOL, n >= LIN_N, cor >= LIN_COR)
 countInGolden(report = diann_report,
              golden_standard = golden_linear,
              QC_type = paste(LIN_PROTOCOL, LIN_N, LIN_COR, sep = ":" )) -> golden_linear_counts

@@ -182,11 +182,10 @@ removeTrend <- function(report, metadata, QC_regex = "MSQC", fit_model = "loess"
 #' @export
 #'
 #' @examples
-#' golden_linear = linear_peptides_5minsswath %>% ungroup %>% filter(protocol == "5-min-sswath", n >=10, cor >= 0.8)
 #' LIN_PROTOCOL = "5-min-sswath"
 #' LIN_N = 10
 #' LIN_COR = 0.8
-#' golden_linear = linear_peptides %>% ungroup %>% filter(protocol == LIN_PROTOCOL, n >= LIN_N, cor >= LIN_COR)
+#' golden_linear = linear_peptides_5minsswath %>% ungroup %>% filter(protocol == LIN_PROTOCOL, n >= LIN_N, cor >= LIN_COR)
 #' countInGolden(report = diann_report,
 #'              golden_standard = golden_linear,
 #'              QC_type = paste(LIN_PROTOCOL, LIN_N, LIN_COR, sep = ":" )) -> golden_linear_counts
@@ -198,11 +197,6 @@ removeTrend <- function(report, metadata, QC_regex = "MSQC", fit_model = "loess"
 countInGolden = function(report, golden_standard,
                          feature_var = "Precursor.Id",
                          QC_type = "linear_peptides" ) {
-  # QC_type = "SP.QC1"
-  # dataset = data_filtered
-  # golden_standard = golden_linear = linear_peptides %>% ungroup %>% filter(protocol == "3-min-sswath", n >=10, cor >= 0.8)
-  # file_var = "File.Name"
-  # feature_var = "Precursor.Id"
 
   golden_standard %>% ungroup() %>% select(all_of(feature_var)) %>% distinct() -> golden_list
   golden_list %>% ungroup() %>% summarise(n()) %>% pull -> golden_n

@@ -107,20 +107,34 @@ plotMissingness <- function(report, metadata, feature_var = "Precursor.Id", run_
 #TODO
 #' Plots
 #'
-#' @param data_counts
-#' @param metadata
-#' @param golden_thr
-#' @param qc_pattern
-#'
+#' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
+#' @param golden_thr threshold for QC line, default = 0.8
+#' @param qc_pattern QC file pattern
+#' @param \strong{data_counts} output from \code{\link{create_metadata}}
 #' @return list of plot and samples bellow golden_thr
 #' @export
 #'
 #' @examples
+#' LIN_PROTOCOL <- "5-min-sswath"
+#' LIN_N <- 10
+#' LIN_COR <- 0.8
+#' LIN_PROTOCOL = "5-min-sswath"
+#' golden_linear <- linear_peptides_5minsswath %>% ungroup %>% filter(protocol == LIN_PROTOCOL, n >= LIN_N, cor >= LIN_COR)
+#'
+#' countInGolden(report = diann_report,
+#'              golden_standard = golden_linear,
+#'              QC_type = paste(LIN_PROTOCOL, LIN_N, LIN_COR, sep = ":" )) -> golden_linear_counts
+#'
+#' metadata <- create_metadata(diann_report)
+#' ret = plotGoldenCounts(golden_linear_counts, metadata, golden_thr = 0.1)
+#'
+#' @import dplyr
+#' @importFrom  magrittr %>%
+#' @import ggplot2
+#' @import tidyr
+#' @import forcats
+#' @importFrom fs as_fs_path
 plotGoldenCounts <- function(data_counts, metadata, golden_thr = 0.9, qc_pattern = ".*?QC.*?") {
-
-  #data_counts = golden_linear_counts # from countInGolden()
-  #golden_thr = 0.8
-  #qc_pattern = ".*?QC.*?"
 
   if(!missing(metadata)) {
     data_counts %>%
