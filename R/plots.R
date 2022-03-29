@@ -36,12 +36,15 @@ plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, features = c("Prot
   return(p)
 }
 
-#' Plots missingness values
+
+
+
+#' Plots missingness matrix
 #'
 #' @param \strong{report} DIA-NN report file
 #' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
 #' @param \strong{feature_var} feature for plotting missingness values
-#' @param run_order_var sample running order
+#' @param run_order_var variable for sample running order
 #' @param subtitle string for a subtitle
 #' @param prevalence_filter filter out non-prevalent proteins, default: 0.1
 #'
@@ -101,16 +104,19 @@ plotMissingness <- function(report, metadata, feature_var = "Precursor.Id", run_
           axis.text.y=element_blank(),
           axis.ticks.x=element_blank(),
           axis.ticks.y=element_blank(),
-          panel.background = element_blank(), legend.position = "bottom", aspect.ratio = 5/8)
+          panel.background = element_blank(), legend.position = "bottom", aspect.ratio = 5/8) -> p
+
+  return(p)
 }
 
+
 #TODO
-#' Plots
+#' Plots combined DIA-NN experiment with Golden standarts metrics
 #'
 #' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
 #' @param golden_thr threshold for QC line, default = 0.8
 #' @param qc_pattern QC file pattern
-#' @param \strong{data_counts} output from \code{\link{create_metadata}}
+#' @param \strong{data_counts} output from \code{\link{countInGolden}}
 #' @return list of plot and samples bellow golden_thr
 #' @export
 #'
@@ -175,5 +181,182 @@ plotGoldenCounts <- function(data_counts, metadata, golden_thr = 0.9, qc_pattern
   return(list(plot = p, lowQC = lowQC))
 }
 
+#' Plots Experiment
+#'
+#' @param \strong{report} DIA-NN report file
+#' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
+#' @param \strong{Q_THR} Q-value filtering threshold, default: 0.01
+#' @param \strong{feature_value} feature value to plot, default: "Precursor.Quantity"
+#' @param \strong{feature_var} feature variable, default: "Precursor.Id"
+#' @param run_order_var variable for sample running order
+#' @param subtitle a string for a plot's subtitle
+#' @param qc_pattern QC file pattern
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' metadata <- create_metadata(diann_report)
+#' plotExperiment(diann_report, metadata = metadata, Q_THR - 0.01)
+#'
+#' @import dplyr
+#' @importFrom  magrittr %>%
+#' @import ggplot2
+#' @import tidyr
+#' @import forcats
+plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precursor.Id", feature_value = "Precursor.Quantity",  run_order_var = "run_order", subtitle = "",  qc_pattern = ".*?QC.*?") {
+
+  # report = diann_report
+  #
+  # metadata = metadata
+  # Q_THR = 0.01
+  # feature_var = "Precursor.Id"
+  # run_order_var = "run_order"
+  # subtitle = "TEST"
+  # qc_pattern = ".*?QC.*?"
+  # feature_value = "Precursor.Quantity"
+
+  report %>%
+    filter(Q.Value < Q_THR) %>%
+    select(all_of(c("File.Name", feature_var, feature_value))) -> dataset
+
+
+
+  if(!missing(metadata)) {
+    dataset %>%
+      ungroup() %>%
+      left_join(metadata, by = "File.Name") %>%
+      mutate(File.Name = fct_reorder(File.Name, run_order)) -> dataset
+  }
+
+  total_samples <- dataset %>% distinct(File.Name) %>% nrow
+  total_qc <- dataset %>% filter(grepl(pattern = qc_pattern, perl = T, ignore.case = T,
+                                       x = basename(as.character(fs::as_fs_path(as.character(File.Name)))))) %>% distinct(File.Name) %>% nrow
+
+  dataset %>%
+    mutate(type = ifelse(str_detect(File.Name, qc_pattern), "QC", "sample")) -> toPlot
+
+  toPlot %>% left_join(metadata) %>%  group_by(File.Name, type) %>% summarise(TIC = sum(Precursor.Quantity, na.rm = T), n  = n()) -> toPlot.summary
+
+  toPlot %>%
+    left_join(metadata) %>%
+    mutate(File.Name = fct_reorder(File.Name, run_order)) %>%
+
+    ggplot(aes(x = File.Name, y = log(!!as.name(feature_value)), fill=type)) +
+    stat_boxplot(geom ='errorbar', width = 0.6) +
+    geom_boxplot() +
+    geom_point(data = toPlot.summary, aes(x =File.Name, y = log(TIC), colour = type)) +
+    labs(subtitle = subtitle,
+         x = "Running order",
+         caption = paste("Total Samples:", total_samples,
+                         "Total QCs:", total_qc,
+                         sep = " ")) +
+    theme_bw() +
+    scale_fill_brewer(palette = "Dark2") +
+    scale_color_brewer(palette = "Dark2") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position = "bottom") -> p
+
+  return(p)
+}
+
+
+#' Plots outliers for Total Ion Count (TIC) and number of features
+#'
+#' @param \strong{report_stats} TIC and n stats, output from \code{\link{countStats}}
+#' @param \strong{Z_THR} Z-score filtering threshold, default: 3
+#' @param \strong{stats} list of stats to plot, e.g. c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
+#'
+#'
+#' @return a list of plots of lenght 2
+#' @export
+#'
+#' @examples
+#' report_stats <- countStats(diann_report)
+#' plots <- plotStats(report_stats, Z_THR = 3, stats = c("Zmod_n", "Z_TIC", "Zmod_TIC"))
+#' plots[[1]]/plots[[2]]
+#'
+#' @import dplyr
+#' @importFrom  magrittr %>%
+#' @import ggplot2
+#' @import tidyr
+plotStats <- function(report_stats, Z_THR = 3, stats = c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC") ) {
+  #stats = c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
+  #Z_THR = 3
+
+  TIC_flag = 0
+  n_flag = 0
+
+  if(any(!(stats %in% c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")))) {
+    stop("Wrong stats specified")
+  }
+
+  if ( any(as_vector(lapply(stats, str_detect, "TIC"))) ) {
+    TIC_flag = 1
+  }
+
+  if (any(as_vector(lapply(stats, str_detect, "n"))) ) {
+    n_flag = 1
+  }
+
+  ret = list()
+
+  if (TIC_flag) {
+    report_stats %>%
+      select(File.Name, TIC, n, all_of(stats)) %>%
+      select(File.Name, matches("TIC")) %>%
+      pivot_longer(cols = starts_with("Z")) -> toPlot
+
+    toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR) %>%
+      group_by(name) %>%
+      summarise(x_val = max(abs(value), na.rm = T),
+                n = n(),
+                y_val = 5) -> outliers
+
+
+    toPlot %>%
+      ggplot(aes(x = TIC)) +
+      geom_histogram(bins = 50, fill = "lightgrey", colour = "white") +
+      geom_jitter(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR), aes(x = TIC, y = 1 ), colour = "red") +
+      facet_wrap(~name, ncol = 1, scales = "free") +
+      ggrepel::geom_text_repel(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR),
+                               aes(x = TIC, y = 1, label = basename(fs::as_fs_path(as.character(File.Name)))), max.overlaps = 100, size = 3.5) +
+      geom_label(data = outliers, aes(x = x_val, y = 5, label = paste("Total outliers:", n)), color = "red") +
+      scale_x_log10() +
+      labs(x = "Total signal per sample, log10(TIC)",
+           subtitle = paste("Outlier abs Z-score threshold > " , Z_THR, sep ="")) +
+      theme_bw() -> p
+
+    ret = lappend(ret, p)
+
+  }
+
+  if (n_flag) {
+    report_stats %>%
+      select(File.Name, TIC, n, all_of(stats)) %>%
+      select(File.Name, matches("n")) %>%
+      pivot_longer(cols = starts_with("Z")) -> toPlot
+
+    toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR) %>%
+      group_by(name) %>%
+      summarise(x_val = max(abs(value), na.rm = T),
+                n = n(),
+                y_val = 5) -> outliers
+
+    toPlot %>%
+      ggplot(aes(x = n)) +
+      geom_histogram(bins = 50, fill = "lightgrey", colour = "white") +
+      geom_jitter(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR), aes(x = n, y = 1 ), colour = "red") +
+      facet_wrap(~name, ncol = 1, scales = "free") +
+      ggrepel::geom_text_repel(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR),
+                               aes(x = n, y = 1, label = basename(fs::as_fs_path(as.character(File.Name)))), max.overlaps = 100, size = 3.5) +
+      geom_label(data = outliers, aes(x = x_val, y = 5, label = paste("Total outliers:", n)), color = "red") +
+      labs(x = "Number or identified precursors per sample",
+           subtitle = paste("Outlier abs Z-score threshold > " , Z_THR, sep ="")) +
+      theme_bw() -> p
+
+    ret = lappend(ret, p)
+  }
+  return(ret)
+}
 
 

@@ -105,7 +105,7 @@ removeTrend <- function(report, metadata, QC_regex = "MSQC", fit_model = "loess"
   report %>%
     select(all_of(c("File.Name", feature_var, feature_value))) -> dataset
 
-  if (!fit_model %in% c("lm", "loess", "rq")) {
+  if (!(fit_model %in% c("lm", "loess", "rq"))) {
     stop("Wrong fit model specified", call. = TRUE, domain = NULL)
   }
 
@@ -175,8 +175,8 @@ removeTrend <- function(report, metadata, QC_regex = "MSQC", fit_model = "loess"
 #'
 #' @param \strong{report} DIA-NN report file
 #' @param \strong{golden_standard} golden standard df with \code{feature_var}
-#' @param \strong{feature_var} feature variable to cout
-#' @param QC_type comment, default (linear peptides)
+#' @param \strong{feature_var} feature variable to count
+#' @param QC_type comment, default: "linear peptides"
 #'
 #' @return
 #' @export
@@ -214,5 +214,40 @@ countInGolden = function(report, golden_standard,
     mutate(QC_type = QC_type) -> dataset_summary
 
   return(dataset_summary)
+}
+
+
+
+#' Counts Z-score stats of precursors
+#'
+#' @param \strong{report} DIA-NN report file
+#' @param \strong{Q_THR} Q-value filtering threshold, default: 0.01
+#' @param \strong{feature_value} feature value to count
+#'
+#' @return returns tbl with Z-scores of feature values from \code{feature_value}
+#' @export
+#'
+#' @examples
+#' diann_report %>%
+#'  filter(!grepl(pattern = ".*?BLANK.*?", perl = T, ignore.case = T, x = File.Name)) %>% #removes blanks
+#'         countStats() -> report_stats
+#'
+#' @import dplyr
+#' @importFrom magrittr %>%
+#' @import tidyr
+countStats <- function(report, Q_THR = 0.01, feature_value = "Precursor.Quantity") {
+  report %>%
+    filter(Q.Value <= Q_THR) %>%
+    group_by(File.Name) %>%
+    summarise(TIC = sum(!!as.name(feature_value)),
+              n  = n()) %>%
+    ungroup() %>%
+    mutate(Z_n = (n - mean(n, na.rm = T))/sd(n, na.rm = T),
+           Z_TIC = (TIC - mean(TIC, na.rm = T))/sd(TIC, na.rm = T),
+           Zmod_n = (n - median(n, na.rm = T))/(1.486*mad(n, na.rm = T)), # modified Z-score using medians https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
+           Zmod_TIC = (TIC - median(TIC, na.rm = T))/(1.486*mad(TIC, na.rm = T))
+           ) -> report_summary
+
+  return(report_summary)
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plotGoldenCounts}
 \alias{plotGoldenCounts}
-\title{Plots}
+\title{Plots combined DIA-NN experiment with Golden standarts metrics}
 \usage{
 plotGoldenCounts(
   data_counts,
@@ -18,13 +18,13 @@ plotGoldenCounts(
 
 \item{qc_pattern}{QC file pattern}
 
-\item{\strong{data_counts}}{output from \code{\link{create_metadata}}}
+\item{\strong{data_counts}}{output from \code{\link{countInGolden}}}
 }
 \value{
 list of plot and samples bellow golden_thr
 }
 \description{
-Plots
+Plots combined DIA-NN experiment with Golden standarts metrics
 }
 \examples{
 LIN_PROTOCOL <- "5-min-sswath"

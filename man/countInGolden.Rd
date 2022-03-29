@@ -12,13 +12,13 @@ countInGolden(
 )
 }
 \arguments{
-\item{QC_type}{comment, default (linear peptides)}
+\item{QC_type}{comment, default: "linear peptides"}
 
 \item{\strong{report}}{DIA-NN report file}
 
 \item{\strong{golden_standard}}{golden standard df with \code{feature_var}}
 
-\item{\strong{feature_var}}{feature variable to cout}
+\item{\strong{feature_var}}{feature variable to count}
 }
 \value{
 

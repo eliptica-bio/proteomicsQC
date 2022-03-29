@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plotMissingness}
 \alias{plotMissingness}
-\title{Plots missingness values}
+\title{Plots missingness matrix}
 \usage{
 plotMissingness(
   report,
@@ -16,7 +16,7 @@ plotMissingness(
 \arguments{
 \item{metadata}{experiment description to arrange by run_order output from \code{\link{create_metadata}}}
 
-\item{run_order_var}{sample running order}
+\item{run_order_var}{variable for sample running order}
 
 \item{subtitle}{string for a subtitle}
 
@@ -30,7 +30,7 @@ plotMissingness(
 
 }
 \description{
-Plots missingness values
+Plots missingness matrix
 }
 \examples{
 metadata <- create_metadata(diann_report)
