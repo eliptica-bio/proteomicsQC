@@ -236,7 +236,7 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
   dataset %>%
     mutate(type = ifelse(str_detect(File.Name, qc_pattern), "QC", "sample")) -> toPlot
 
-  toPlot %>% left_join(metadata) %>%  group_by(File.Name, type) %>% summarise(TIC = sum(Precursor.Quantity, na.rm = T), n  = n()) -> toPlot.summary
+  toPlot %>% left_join(metadata) %>%  group_by(File.Name, type) %>% summarise(TIC = sum(!!as.name(feature_value), na.rm = T), n  = n()) -> toPlot.summary
 
   toPlot %>%
     left_join(metadata) %>%
