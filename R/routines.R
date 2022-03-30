@@ -44,7 +44,7 @@ create_metadata = function(report, INTO =  c("Batch", "sample_id", "run_order", 
 #'
 #' @param \strong{report} DIA-NN report file
 #' @param \strong{feature_var} a single feature such as Precursor.Id
-#'
+#' @param \strong{Q_THR} Q-value filtering threshold, default: 0.01
 #' @return df with feature prevalence values
 #' @export
 #'
@@ -54,9 +54,10 @@ create_metadata = function(report, INTO =  c("Batch", "sample_id", "run_order", 
 #' @importFrom magrittr %>%
 #' @import tidyr
 
-getPrevalence <- function(report, feature_var = "Precursor.Id") {
+getPrevalence <- function(report, Q_THR = 0.01, feature_var = "Precursor.Id") {
 
   report %>%
+    filter(Q.Value <= Q_THR) %>%
     select(all_of(c("File.Name", feature_var))) %>% distinct() -> data_tmp
 
   data_tmp %>% mutate(isPresent = 1) -> data_tmp

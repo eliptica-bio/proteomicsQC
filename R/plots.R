@@ -47,6 +47,7 @@ plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, features = c("Prot
 #' @param run_order_var variable for sample running order
 #' @param subtitle string for a subtitle
 #' @param prevalence_filter filter out non-prevalent proteins, default: 0.1
+#' @param \strong{Q_THR} Q-value filtering threshold, default: 0.01
 #'
 #' @return
 #' @export
@@ -59,11 +60,12 @@ plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, features = c("Prot
 #' @import ggplot2
 #' @import tidyr
 #' @import forcats
-plotMissingness <- function(report, metadata, feature_var = "Precursor.Id", run_order_var = "run_order", subtitle = "", prevalence_filter = 0.1) {
+plotMissingness <- function(report, metadata, Q_THR = 0.01,  feature_var = "Precursor.Id", run_order_var = "run_order", subtitle = "", prevalence_filter = 0.1) {
 
-  feature_prevalence <- getPrevalence(report, feature_var = feature_var)
+  feature_prevalence <- getPrevalence(report = report, Q_THR = Q_THR, feature_var = feature_var)
 
   report %>%
+    filter(Q.Value <= Q_THR) %>%
     select(all_of(c("File.Name", feature_var))) %>%
     semi_join(feature_prevalence %>% filter(prevalence > prevalence_filter), by = feature_var) -> data_tmp
 
