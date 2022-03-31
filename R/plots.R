@@ -224,11 +224,12 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
 
 
 
+
   if(!missing(metadata)) {
     dataset %>%
       ungroup() %>%
       left_join(metadata, by = "File.Name") %>%
-      mutate(File.Name = fct_reorder(File.Name, run_order)) -> dataset
+      mutate(File.Name = fct_reorder(File.Name, !!as.name(run_order_var))) -> dataset
   }
 
   total_samples <- dataset %>% distinct(File.Name) %>% nrow
@@ -242,7 +243,7 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
 
   toPlot %>%
     left_join(metadata) %>%
-    mutate(File.Name = fct_reorder(File.Name, run_order)) %>%
+    mutate(File.Name = fct_reorder(File.Name, !!as.name(run_order_var))) %>%
 
     ggplot(aes(x = File.Name, y = log(!!as.name(feature_value)), fill=type)) +
     stat_boxplot(geom ='errorbar', width = 0.6) +
