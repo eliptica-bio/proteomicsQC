@@ -4,7 +4,7 @@
 #' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
 #' @param \strong{Q_THR} Q-value filtering threshold (Default)
 #' @param \strong{features} list of features to plot, e.g. c("Protein.Group", "Protein.Ids", "Precursor.Id")
-#'
+#' @param run_order_var variable for sample running order
 #' @return
 #' @export
 #'
@@ -14,7 +14,7 @@
 #' @importFrom  magrittr %>%
 #' @import ggplot2
 #' @import tidyr
-plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, features = c("Protein.Group", "Protein.Ids", "Precursor.Id")) {
+plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, run_order_var = "run_order", features = c("Protein.Group", "Protein.Ids", "Precursor.Id")) {
   report %>%
     filter(Q.Value < Q_THR) %>%
     select(all_of(c("File.Name", features))) %>%
@@ -23,8 +23,8 @@ plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, features = c("Prot
   if(!missing(metadata)) {
     features_selected %>%
       ungroup() %>%
-      left_join(metadata %>% select(File.Name, run_order), by = "File.Name") %>%
-      mutate(File.Name = fct_reorder(File.Name, run_order)) -> features_selected
+      left_join(metadata %>% select(File.Name, !!as.name(run_order_var)), by = "File.Name") %>%
+      mutate(File.Name = fct_reorder(File.Name, !!as.name(run_order_var))) -> features_selected
   }
   features_selected %>%
     ggplot(aes(x=File.Name)) +

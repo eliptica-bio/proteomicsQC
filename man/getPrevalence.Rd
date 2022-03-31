@@ -4,12 +4,14 @@
 \alias{getPrevalence}
 \title{Counts prevalence of features (e.g. Precursor.Id) from DIA-NN report}
 \usage{
-getPrevalence(report, feature_var = "Precursor.Id")
+getPrevalence(report, Q_THR = 0.01, feature_var = "Precursor.Id")
 }
 \arguments{
 \item{\strong{report}}{DIA-NN report file}
 
 \item{\strong{feature_var}}{a single feature such as Precursor.Id}
+
+\item{\strong{Q_THR}}{Q-value filtering threshold, default: 0.01}
 }
 \value{
 df with feature prevalence values

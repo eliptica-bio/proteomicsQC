@@ -8,11 +8,14 @@ plotFeatureCounts(
   report,
   metadata,
   Q_THR = 0.01,
+  run_order_var = "run_order",
   features = c("Protein.Group", "Protein.Ids", "Precursor.Id")
 )
 }
 \arguments{
 \item{metadata}{experiment description to arrange by run_order output from \code{\link{create_metadata}}}
+
+\item{run_order_var}{variable for sample running order}
 
 \item{\strong{report}}{DIA-NN report file}
 

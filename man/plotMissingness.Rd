@@ -7,6 +7,7 @@
 plotMissingness(
   report,
   metadata,
+  Q_THR = 0.01,
   feature_var = "Precursor.Id",
   run_order_var = "run_order",
   subtitle = "",
@@ -25,6 +26,8 @@ plotMissingness(
 \item{\strong{report}}{DIA-NN report file}
 
 \item{\strong{feature_var}}{feature for plotting missingness values}
+
+\item{\strong{Q_THR}}{Q-value filtering threshold, default: 0.01}
 }
 \value{
 
