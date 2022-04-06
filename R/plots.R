@@ -180,7 +180,7 @@ plotGoldenCounts <- function(data_counts, metadata, golden_thr = 0.9, qc_pattern
     scale_fill_brewer(palette = "Dark2") +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position = "bottom") -> p
 
-  return(list(plot = p, lowQC = lowQC))
+  return(list(plot = p, lowQC = lowQC, PASSED = 1 - nrow(lowQC)/total_samples))
 }
 
 #' Plots Experiment
