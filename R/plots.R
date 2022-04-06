@@ -16,7 +16,7 @@
 #' @import tidyr
 plotFeatureCounts <- function(report, metadata, Q_THR = 0.01, run_order_var = "run_order", features = c("Protein.Group", "Protein.Ids", "Precursor.Id")) {
   report %>%
-    filter(Q.Value < Q_THR) %>%
+    filter(across(any_of("Q.Value"), ~.x < Q_THR)) %>%
     select(all_of(c("File.Name", features))) %>%
     pivot_longer(cols = all_of(features)) %>% distinct() -> features_selected
 
@@ -65,7 +65,7 @@ plotMissingness <- function(report, metadata, Q_THR = 0.01,  feature_var = "Prec
   feature_prevalence <- getPrevalence(report = report, Q_THR = Q_THR, feature_var = feature_var)
 
   report %>%
-    filter(Q.Value <= Q_THR) %>%
+    filter(across(any_of("Q.Value"), ~.x < Q_THR)) %>%
     select(all_of(c("File.Name", feature_var))) %>%
     semi_join(feature_prevalence %>% filter(prevalence > prevalence_filter), by = feature_var) -> data_tmp
 
@@ -219,7 +219,7 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
   # feature_value = "Precursor.Quantity"
 
   report %>%
-    filter(Q.Value < Q_THR) %>%
+    filter(across(any_of("Q.Value"), ~.x < Q_THR)) %>%
     select(all_of(c("File.Name", feature_var, feature_value))) -> dataset
 
 
