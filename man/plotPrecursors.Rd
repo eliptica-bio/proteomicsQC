@@ -34,7 +34,7 @@ plotPrecursors(
 
 \item{\strong{run_order_var}}{variable for sample running order, default: "run_order"}
 
-\item{\string{n}}{number of features to plot, default: 6}
+\item{\strong{n}}{number of features to plot, default: 6}
 }
 \value{
 returns feature plot
