@@ -370,7 +370,7 @@ plotStats <- function(report_stats, Z_THR = 3, stats = c("Z_n", "Z_TIC", "Zmod_n
 #' @param \strong{feature_value} feature value to plot, default: "Precursor.Quantity"
 #' @param \strong{feature_var} feature variable, default: "Precursor.Id"
 #' @param \strong{run_order_var} variable for sample running order, default: "run_order"
-#' @param \string{n} number of features to plot, default: 6
+#' @param \strong{n} number of features to plot, default: 6
 #' @param subtitle a string for a plot's subtitle
 #' @param qc_pattern QC file pattern, default: ".*?QC.*?"
 #' @return returns feature plot
