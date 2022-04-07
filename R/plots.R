@@ -409,6 +409,11 @@ plotPrecursors = function(report, metadata, Q_THR, n = 6, run_order_var = "run_o
 
   dataset %>% filter(!!as.name(feature_var) %in% selected_features) %>% group_by(File.Name, !!as.name(feature_var)) %>% summarise( {{feature_value}} := max(!!sym(feature_value), na.rm = T)) -> dataset
 
+  total_samples <- dataset %>% distinct(File.Name) %>% nrow
+  total_qc <- dataset %>% filter(grepl(pattern = qc_pattern, perl = T, ignore.case = T,
+                                       x = basename(as.character(fs::as_fs_path(as.character(File.Name)))))) %>% distinct(File.Name) %>% nrow
+
+
   if(!missing(metadata)) {
     dataset %>%
       ungroup() %>%
@@ -429,7 +434,10 @@ plotPrecursors = function(report, metadata, Q_THR, n = 6, run_order_var = "run_o
                           aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                           parse = TRUE) +
     facet_wrap(as.formula(paste("~", feature_var)), ncol = 1, scales = "free_y") +
-    labs(subtitle = subtitle) +
+    labs(subtitle = subtitle,
+         xlab = "Running order",
+         caption = paste("Total samples:", total_samples,
+                          "QCs:", total_qc, sep = " ") ) +
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
