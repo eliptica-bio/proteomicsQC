@@ -40,6 +40,6 @@ Plots Experiment
 }
 \examples{
 metadata <- create_metadata(diann_report)
-plotExperiment(diann_report, metadata = metadata, Q_THR - 0.01)
+plotExperiment(diann_report, metadata = metadata, Q_THR = 0.01)
 
 }

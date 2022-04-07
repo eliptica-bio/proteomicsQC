@@ -199,7 +199,7 @@ plotGoldenCounts <- function(data_counts, metadata, golden_thr = 0.9, qc_pattern
 #'
 #' @examples
 #' metadata <- create_metadata(diann_report)
-#' plotExperiment(diann_report, metadata = metadata, Q_THR - 0.01)
+#' plotExperiment(diann_report, metadata = metadata, Q_THR = 0.01)
 #'
 #' @import dplyr
 #' @importFrom  magrittr %>%
@@ -270,7 +270,7 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
 #' @param \strong{stats} list of stats to plot, e.g. c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
 #'
 #'
-#' @return a list of plots of lenght 2
+#' @return a list of plots of length 2
 #' @export
 #'
 #' @examples
@@ -362,4 +362,77 @@ plotStats <- function(report_stats, Z_THR = 3, stats = c("Z_n", "Z_TIC", "Zmod_n
   return(ret)
 }
 
+#' Plots features (e.g. Precursor.Id) across entire batch run
+#'
+#' @param \strong{report} DIA-NN report file
+#' @param metadata experiment description to arrange by run_order output from \code{\link{create_metadata}}
+#' @param \strong{Q_THR} Q-value filtering threshold, default: 0.01
+#' @param \strong{feature_value} feature value to plot, default: "Precursor.Quantity"
+#' @param \strong{feature_var} feature variable, default: "Precursor.Id"
+#' @param \strong{run_order_var} variable for sample running order, default: "run_order"
+#' @param \string{n} number of features to plot, default: 6
+#' @param subtitle a string for a plot's subtitle
+#' @param qc_pattern QC file pattern, default: ".*?QC.*?"
+#' @return returns feature plot
+#' @export
+#'
+#' @examples
+#' metadata <- create_metadata(diann_report)
+#' plotPrecursors(diann_report, metadata = metadata, Q_THR = 0.01, n = 6, run_order_var = "run_order", feature_var="Precursor.Id", feature_value = "Precursor.Quantity", qc_pattern = ".*?MSQC.*?")
+#' @import dplyr
+#' @importFrom  magrittr %>%
+#' @importFrom ggpmisc stat_poly_eq
+#' @import ggplot2
+#' @import tidyr
 
+plotPrecursors = function(report, metadata, Q_THR, n = 6, run_order_var = "run_order", feature_var="Precursor.Id", feature_value = "Precursor.Quantity", qc_pattern = ".*?QC.*?", subtitle = "TEST",  seed = 123) {
+
+  if(missing(metadata) | missing(run_order_var)) {
+    stop("metadata with run_order_var must by provided")
+  }
+
+  # feature_var="Precursor.Id"
+  # feature_value = "Precursor.Quantity"
+  # report = diann_report
+  # run_order_var = "run_order"
+  # qc_pattern = ".*?MSQC.*?"
+  # n = 6
+  # seed = 123
+  # subtittle = "test"
+  #
+  report %>%
+    filter(across(any_of("Q.Value"), ~.x < Q_THR)) %>%
+    select(all_of(c("File.Name", feature_var, feature_value))) -> dataset
+
+  set.seed(seed)
+  dataset %>% ungroup() %>% select(all_of(feature_var)) %>% distinct() %>% sample_n(n) %>% pull -> selected_features
+
+  dataset %>% filter(!!as.name(feature_var) %in% selected_features) %>% group_by(File.Name, !!as.name(feature_var)) %>% summarise( {{feature_value}} := max(!!sym(feature_value), na.rm = T)) -> dataset
+
+  if(!missing(metadata)) {
+    dataset %>%
+      ungroup() %>%
+      left_join(metadata, by = "File.Name") %>%
+      mutate(File.Name = fct_reorder(File.Name, !!as.name(run_order_var))) -> dataset
+  }
+
+  dataset %>%
+    mutate(type = ifelse(str_detect(File.Name, qc_pattern), "QC", "sample")) -> toPlot
+  my.formula <- y ~ x
+  toPlot %>%
+    ggplot(aes(x = !!as.name(run_order_var), y = !!as.name(feature_value), colour = type)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, colour = "red") +
+    ggpmisc::stat_poly_eq(formula = my.formula,
+                          eq.with.lhs = "italic(hat(y))~`=`~",
+                          colour = "black",
+                          aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                          parse = TRUE) +
+    facet_wrap(as.formula(paste("~", feature_var)), ncol = 1, scales = "free_y") +
+    labs(subtitle = subtitle) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          legend.position = "bottom") -> p
+  return(p)
+}

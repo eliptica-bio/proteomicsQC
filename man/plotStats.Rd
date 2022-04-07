@@ -18,7 +18,7 @@ plotStats(
 \item{\strong{stats}}{list of stats to plot, e.g. c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")}
 }
 \value{
-a list of plots of lenght 2
+a list of plots of length 2
 }
 \description{
 Plots outliers for Total Ion Count (TIC) and number of features
