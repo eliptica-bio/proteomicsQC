@@ -4,18 +4,14 @@
 \alias{plotStats}
 \title{Plots outliers for Total Ion Count (TIC) and number of features}
 \usage{
-plotStats(
-  report_stats,
-  Z_THR = 3,
-  stats = c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
-)
+plotStats(report_stats, Z_THR = 3, stats = c("Zn", "ZTIC", "Zmodn", "ZmodTIC"))
 }
 \arguments{
 \item{\strong{report_stats}}{TIC and n stats, output from \code{\link{countStats}}}
 
 \item{\strong{Z_THR}}{Z-score filtering threshold, default: 3}
 
-\item{\strong{stats}}{list of stats to plot, e.g. c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")}
+\item{\strong{stats}}{list of stats to plot, e.g. c("Zn", "ZTIC", "Zmodn", "ZmodTIC")}
 }
 \value{
 a list of plots of length 2
@@ -25,7 +21,7 @@ Plots outliers for Total Ion Count (TIC) and number of features
 }
 \examples{
 report_stats <- countStats(diann_report)
-plots <- plotStats(report_stats, Z_THR = 3, stats = c("Zmod_n", "Z_TIC", "Zmod_TIC"))
+plots <- plotStats(report_stats, Z_THR = 3, stats = c("Zmodn", "ZTIC", "ZmodTIC"))
 plots[[1]]/plots[[2]]
 
 }

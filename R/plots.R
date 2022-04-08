@@ -267,7 +267,7 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
 #'
 #' @param \strong{report_stats} TIC and n stats, output from \code{\link{countStats}}
 #' @param \strong{Z_THR} Z-score filtering threshold, default: 3
-#' @param \strong{stats} list of stats to plot, e.g. c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
+#' @param \strong{stats} list of stats to plot, e.g. c("Zn", "ZTIC", "Zmodn", "ZmodTIC")
 #'
 #'
 #' @return a list of plots of length 2
@@ -275,21 +275,21 @@ plotExperiment <- function(report, metadata, Q_THR = 0.01, feature_var = "Precur
 #'
 #' @examples
 #' report_stats <- countStats(diann_report)
-#' plots <- plotStats(report_stats, Z_THR = 3, stats = c("Zmod_n", "Z_TIC", "Zmod_TIC"))
+#' plots <- plotStats(report_stats, Z_THR = 3, stats = c("Zmodn", "ZTIC", "ZmodTIC"))
 #' plots[[1]]/plots[[2]]
 #'
 #' @import dplyr
 #' @importFrom  magrittr %>%
 #' @import ggplot2
 #' @import tidyr
-plotStats <- function(report_stats, Z_THR = 3, stats = c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC") ) {
-  #stats = c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")
+plotStats <- function(report_stats, Z_THR = 3, stats = c("Zn", "ZTIC", "Zmodn", "ZmodTIC") ) {
+  #stats = c("Zn", "ZTIC", "Zmodn", "ZmodTIC")
   #Z_THR = 3
 
   TIC_flag = 0
   n_flag = 0
 
-  if(any(!(stats %in% c("Z_n", "Z_TIC", "Zmod_n", "Zmod_TIC")))) {
+  if(any(!(stats %in% c("Zn", "ZTIC", "Zmodn", "ZmodTIC")))) {
     stop("Wrong stats specified")
   }
 

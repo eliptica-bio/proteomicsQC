@@ -243,10 +243,10 @@ countStats <- function(report, Q_THR = 0.01, feature_value = "Precursor.Quantity
     summarise(TIC = sum(!!as.name(feature_value)),
               n  = n()) %>%
     ungroup() %>%
-    mutate(Z_n = (n - mean(n, na.rm = T))/sd(n, na.rm = T),
-           Z_TIC = (TIC - mean(TIC, na.rm = T))/sd(TIC, na.rm = T),
-           Zmod_n = (n - median(n, na.rm = T))/(1.486*mad(n, na.rm = T)), # modified Z-score using medians https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
-           Zmod_TIC = (TIC - median(TIC, na.rm = T))/(1.486*mad(TIC, na.rm = T))
+    mutate(Zn = (n - mean(n, na.rm = T))/sd(n, na.rm = T),
+           ZTIC = (TIC - mean(TIC, na.rm = T))/sd(TIC, na.rm = T),
+           Zmodn = (n - median(n, na.rm = T))/(1.486*mad(n, na.rm = T)), # modified Z-score using medians https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
+           ZmodTIC = (TIC - median(TIC, na.rm = T))/(1.486*mad(TIC, na.rm = T))
            ) -> report_summary
 
   return(report_summary)
