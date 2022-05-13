@@ -319,7 +319,7 @@ plotStats <- function(report_stats, Z_THR = 3, stats = c("Zn", "ZTIC", "Zmodn", 
     toPlot %>%
       ggplot(aes(x = TIC)) +
       geom_histogram(bins = 50, fill = "lightgrey", colour = "white") +
-      geom_jitter(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR), aes(x = TIC, y = 1 ), colour = "red") +
+      #geom_jitter(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR), aes(x = TIC, y = 1 ), colour = "red") +
       facet_wrap(~name, ncol = 1, scales = "free") +
       ggrepel::geom_text_repel(data = toPlot %>% filter(round(abs(value), digits = 1) >= Z_THR),
                                aes(x = TIC, y = 1, label = basename(fs::as_fs_path(as.character(File.Name)))), max.overlaps = 100, size = 3.5) +
