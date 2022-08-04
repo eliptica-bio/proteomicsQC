@@ -112,15 +112,16 @@ removeTrend <- function(report, metadata, QC_regex = "MSQC", fit_model = "loess"
 
   dataset %>% filter(grepl(QC_regex, File.Name)) -> data_filtered_qc_pooled
 
-  if (nrow(data_filtered_qc_pooled) < 4) {
-    stop(paste("check regular expression match for QC samples, few samples returned", nrow(data_filtered_qc_pooled)), call. = TRUE, domain = NULL)
-  }
-
-
   data_filtered_qc_pooled %>%
     left_join(metadata, by = "File.Name") %>%
     group_by(!!as.name(feature_var)) %>%
+    filter(n() >= 2) %>% # prevents regression from crush due to 1 data point
     nest() -> data_nested_qc
+
+
+  if (nrow(data_nested_qc) == 0) {
+    stop(paste("check regular expression match for QC samples, few samples returned", nrow(data_nested_qc)), call. = TRUE, domain = NULL)
+  }
 
   model_formula = formula(paste(feature_value,  "~ run_order", sep = ""))
   qc_model = NULL
