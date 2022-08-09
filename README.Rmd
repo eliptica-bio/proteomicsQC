@@ -101,9 +101,13 @@ Plots outliers statistics
 ```{r, fig.width=12}
 diann_report %>%
   countStats() -> report_stats
-plotStats(report_stats, Z_THR = 3, stats = c("Zmod_n", "Z_TIC", "Zmod_TIC")) -> plots
+plotStats(report_stats, Z_THR = 3, stats = c("Zn", "ZTIC", "ZmodTIC")) -> plots
 
 plots[[1]]/plots[[2]]
+
+```
+
+```{r}
 
 ```
 

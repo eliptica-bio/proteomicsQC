@@ -57,6 +57,7 @@ create_metadata = function(report, INTO =  c("Batch", "sample_id", "run_order", 
 getPrevalence <- function(report, Q_THR = 0.01, feature_var = "Precursor.Id") {
 
   report %>%
+    ungroup() %>%
     filter(Q.Value <= Q_THR) %>%
     select(all_of(c("File.Name", feature_var))) %>% distinct() -> data_tmp
 
